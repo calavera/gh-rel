@@ -1,0 +1,79 @@
+
+/*@media (min-width: 34em)*/
+body {
+  font-family: "Helvetica Neue",Helvetica,arial,nimbussansl,liberationsans,freesans,clean,sans-serif,"Segoe UI Emoji","Segoe UI Symbol";
+  font-size: 1rem;
+}
+
+.page-header {
+  text-align: left;
+  padding-top: .8rem;
+  padding-bottom: .8rem;
+  background-color: #023858; /* purple #4F3871; */
+  color: #FFFFFF;
+}
+
+.page-header .logo {
+  width: 8%;
+  margin-top: 8px;
+}
+
+.projects {
+  padding-top: 2rem;
+  padding: 50px 200px 50px;
+}
+
+.row {
+  margin-bottom: 20px;
+}
+
+.project {
+  text-align: left;
+  font-size: 1.2em;
+}
+
+.owner,
+.path-divider,
+.repo {
+  vertical-align: top;
+}
+
+.prerelease {
+  background-color: #c9510c;
+}
+
+.latest {
+  background-color: #6cc644;
+}
+
+.wip {
+  background-color: #767676;
+}
+
+.release-label {
+    display: inline-block;
+    margin-top: 1px;
+    margin-bottom: 10px;
+    padding: 5px 10px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    border-radius: 3px;
+}
+
+
+.release-label a {
+  color: #fff;
+}
+
+.release {
+  text-align: center;
+}
+
+.projects-header {
+  margin-bottom: 40px;
+}
+
+.none {
+  visibility: hidden;
+}
