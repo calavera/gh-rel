@@ -48,7 +48,7 @@ func fullMain() {
 
 	rootCmd := &cobra.Command{Use: "gh-rel"}
 	rootCmd.AddCommand(cmdAdd, cmdServe)
-	rootCmd.Flags().StringVarP(&dbPath, "db", "d", db.DefaultPath, "path to the database file")
+	rootCmd.PersistentFlags().StringVarP(&dbPath, "db", "d", db.DefaultPath, "path to the database file")
 
 	rootCmd.Execute()
 }
