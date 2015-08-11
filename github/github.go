@@ -42,6 +42,9 @@ func NextRcRelease(owner, name, etag string) (*octokit.Release, *octokit.Result,
 	}
 
 	for _, r := range releases {
+		if !r.Draft && !r.Prerelease {
+			break
+		}
 		if r.Prerelease {
 			return &r, result, respEtag
 		}
