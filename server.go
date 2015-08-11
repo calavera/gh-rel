@@ -92,6 +92,10 @@ func getRcRelease(p db.Project) release {
 		return release{p.LatestRelease.Tag, p.LatestRelease.HTMLURL}
 	}
 
+	if rel == nil {
+		return release{Tag: db.WIP}
+	}
+
 	if res.Response.StatusCode == http.StatusOK {
 		db.SaveNextRcRelease(p.Name, rel.TagName, rel.HTMLURL, etag)
 		return release{rel.TagName, rel.HTMLURL}
