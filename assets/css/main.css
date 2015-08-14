@@ -77,3 +77,25 @@ body {
 .none {
   visibility: hidden;
 }
+
+.add-repo {
+  padding-bottom: 20px;
+}
+
+.add-repo .repo {
+  font-size: 1.2em;
+  vertical-align: middle;
+  padding-right: 12px;
+}
+
+.add-repo .octicon-repo {
+  vertical-align: bottom;
+}
+
+.flash {
+  margin-bottom: 20px;
+}
+
+.left {
+  float: left;
+}

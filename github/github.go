@@ -2,13 +2,16 @@ package github
 
 import (
 	"net/url"
+	"strings"
 
+	"github.com/calavera/gh-rel/db"
 	"github.com/octokit/go-octokit/octokit"
 )
 
 const (
 	etagKey      = "ETag"
 	noneMatchKey = "If-None-Match"
+	defaultOrg   = "docker"
 )
 
 var internal *octokit.Client
@@ -51,6 +54,20 @@ func NextRcRelease(owner, name, etag string) (*octokit.Release, *octokit.Result,
 	}
 
 	return nil, result, ""
+}
+
+func AddProject(nwo string) error {
+	nameWithOwner := strings.Split(nwo, "/")
+	if len(nameWithOwner) == 1 {
+		nameWithOwner = []string{defaultOrg, nameWithOwner[0]}
+	}
+
+	p, r := Project(nameWithOwner[0], nameWithOwner[1])
+	if r.HasError() {
+		return r.Err
+	}
+
+	return db.AddProject(p.FullName, p.HTMLURL)
 }
 
 func releaseRequest(owner, name, etag string, uri octokit.Hyperlink, output interface{}) (result *octokit.Result, respEtag string) {

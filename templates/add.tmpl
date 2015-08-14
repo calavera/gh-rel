@@ -1,0 +1,21 @@
+<div class="projects">
+  <form action="/add" method="post">
+    {{ if .Error }}
+    <div class="colums">
+      <div class="flash flash-error flash-with-icon">
+        <span class="octicon octicon-alert"></span>
+        {{ .Error }}
+      </div>
+    </div>
+    {{ end }}
+
+    <div class="columns">
+      <div class="add-repo column">
+        <span class="mega-octicon octicon-repo"></span>
+        <span class="repo">Repo</span>
+        <input type="text" size="57" name="repo">
+        <button class="btn btn-primary" type="submit">Add</button>
+      </div>
+    </div>
+  </form>
+</div>

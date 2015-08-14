@@ -8,6 +8,7 @@ import (
 
 	"github.com/calavera/gh-rel/db"
 	"github.com/calavera/gh-rel/github"
+	"github.com/calavera/gh-rel/render"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,13 +42,29 @@ type index struct {
 	Projects []project
 }
 
-func startServer(port uint) {
+type add struct {
+	Error error
+}
+
+func startServer(port uint, adminPassword string) {
 	router := gin.Default()
 	router.Static("/assets", "./assets")
 	router.LoadHTMLGlob("templates/*")
 
 	router.GET("/", func(c *gin.Context) {
 		showProjects(c)
+	})
+
+	authorized := router.Group("/add", gin.BasicAuth(gin.Accounts{
+		"admin": adminPassword,
+	}))
+
+	authorized.GET("", func(c *gin.Context) {
+		render.New(c).HTML(http.StatusOK, "add.tmpl", nil)
+	})
+
+	authorized.POST("", func(c *gin.Context) {
+		addNewProject(c)
 	})
 
 	router.Run(fmt.Sprintf(":%v", port))
@@ -68,7 +85,22 @@ func showProjects(c *gin.Context) {
 		prs = append(prs, project{p.Owner(), p.Repo(), lr, rc})
 	}
 
-	c.HTML(http.StatusOK, "index.tmpl", index{prs})
+	render.New(c).HTML(http.StatusOK, "index.tmpl", index{prs})
+}
+
+func addNewProject(c *gin.Context) {
+	nwo := strings.TrimSpace(c.PostForm("repo"))
+	if nwo == "" {
+		render.New(c).HTML(http.StatusOK, "add.tmpl", add{fmt.Errorf("the repository name cannot be empty")})
+		return
+	}
+
+	if err := github.AddProject(nwo); err != nil {
+		render.New(c).HTML(http.StatusOK, "add.tmpl", add{err})
+		return
+	}
+
+	showProjects(c)
 }
 
 func getLatestRelease(p db.Project) release {
