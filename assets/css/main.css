@@ -5,6 +5,10 @@ body {
   font-size: 1rem;
 }
 
+object{
+  pointer-events: none;
+}
+
 .page-header {
   text-align: left;
   padding-top: .8rem;
@@ -16,6 +20,10 @@ body {
 .page-header .logo {
   width: 8%;
   margin-top: 8px;
+}
+
+.page-header .logo a {
+  display: inline-block;
 }
 
 .projects {
