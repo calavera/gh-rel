@@ -13,6 +13,7 @@ func fullMain() {
 	var port uint
 	var dbPath string
 	var githubAuthToken string
+	var adminPassword string
 
 	cmdAdd := &cobra.Command{
 		Use:   "add [owner/name]",
@@ -40,11 +41,12 @@ func fullMain() {
 		Run: func(cmd *cobra.Command, args []string) {
 			setup(dbPath, githubAuthToken)
 			defer teardown()
-			startServer(port)
+			startServer(port, adminPassword)
 		},
 	}
 	cmdServe.Flags().UintVarP(&port, "port", "p", 8888, "port to serve the web application")
 	cmdServe.Flags().StringVarP(&githubAuthToken, "auth", "a", "", "GitHub auth token")
+	cmdServe.Flags().StringVarP(&adminPassword, "passwd", "", "passw0rd", "Admin password to add projects")
 
 	rootCmd := &cobra.Command{Use: "gh-rel"}
 	rootCmd.AddCommand(cmdAdd, cmdServe)

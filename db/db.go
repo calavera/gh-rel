@@ -52,7 +52,11 @@ func AddProject(name, htmlURL string) error {
 	return internal.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(projectsBucket)
 
-		b.Put([]byte(name), []byte(htmlURL))
+		n := []byte(name)
+		if b.Get(n) != nil {
+			return fmt.Errorf("the project already exists: %s", name)
+		}
+		b.Put(n, []byte(htmlURL))
 		return nil
 	})
 }
