@@ -13,8 +13,9 @@ import (
 )
 
 type release struct {
-	Tag string
-	URL string
+	Tag        string
+	URL        string
+	prerelease bool
 }
 
 func (r release) WIP() bool {
@@ -25,7 +26,7 @@ func (r release) Label() string {
 	if r.WIP() {
 		return "wip"
 	}
-	if strings.Contains(strings.ToLower(r.Tag), "rc") {
+	if r.prerelease || strings.Contains(strings.ToLower(r.Tag), "rc") {
 		return "prerelease"
 	}
 	return "latest"
@@ -107,21 +108,21 @@ func getLatestRelease(p db.Project) release {
 	rel, res, etag := github.LatestRelease(p.Owner(), p.Repo(), p.LatestReleaseEtag)
 	if res.HasError() {
 		log.Println(res.Err)
-		return release{p.LatestRelease.Tag, p.LatestRelease.HTMLURL}
+		return release{p.LatestRelease.Tag, p.LatestRelease.HTMLURL, false}
 	}
 
 	if res.Response.StatusCode == http.StatusOK {
 		db.SaveLatest(p.Name, rel.TagName, rel.HTMLURL, etag)
-		return release{rel.TagName, rel.HTMLURL}
+		return release{rel.TagName, rel.HTMLURL, false}
 	}
-	return release{p.LatestRelease.Tag, p.LatestRelease.HTMLURL}
+	return release{p.LatestRelease.Tag, p.LatestRelease.HTMLURL, false}
 }
 
 func getRcRelease(p db.Project) release {
 	rel, res, etag := github.NextRcRelease(p.Owner(), p.Repo(), p.ReleasesEtag)
 	if res.HasError() {
 		log.Println(res.Err)
-		return release{p.LatestRelease.Tag, p.LatestRelease.HTMLURL}
+		return release{p.LatestRelease.Tag, p.LatestRelease.HTMLURL, true}
 	}
 
 	if rel == nil {
@@ -130,7 +131,7 @@ func getRcRelease(p db.Project) release {
 
 	if res.Response.StatusCode == http.StatusOK {
 		db.SaveNextRcRelease(p.Name, rel.TagName, rel.HTMLURL, etag)
-		return release{rel.TagName, rel.HTMLURL}
+		return release{rel.TagName, rel.HTMLURL, true}
 	}
-	return release{p.NextPreRelease.Tag, p.NextPreRelease.HTMLURL}
+	return release{p.NextPreRelease.Tag, p.NextPreRelease.HTMLURL, true}
 }

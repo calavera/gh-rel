@@ -22,8 +22,9 @@ func (p Project) Repo() string {
 }
 
 type Release struct {
-	Tag     string
-	HTMLURL string
+	Tag        string
+	HTMLURL    string
+	Prerelease bool
 }
 
 func wipRelease() Release {
