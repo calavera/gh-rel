@@ -1,6 +1,7 @@
 package db
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path"
@@ -90,19 +91,19 @@ func ListProjects() (projects []Project, err error) {
 }
 
 func SaveLatest(project, tag, url, etag string) error {
-	return saveProjectRelease(project, "latest", tag, url, etag)
+	return saveProjectRelease(project, "latest", tag, url, etag, false)
 }
 
 func SaveNextRcRelease(project, tag, url, etag string) error {
-	return saveProjectRelease(project, "rc", tag, url, etag)
+	return saveProjectRelease(project, "rc", tag, url, etag, true)
 }
 
-func saveProjectRelease(project, from, tag, url, etag string) error {
+func saveProjectRelease(project, from, tag, url, etag string, prerelease bool) error {
 	return internal.Update(func(tx *bolt.Tx) error {
 		if err := saveEtag(tx, project, from, etag); err != nil {
 			return err
 		}
-		if err := saveRelease(tx, project, from, tag, url); err != nil {
+		if err := saveRelease(tx, project, from, tag, url, prerelease); err != nil {
 			return err
 		}
 		return nil
@@ -125,46 +126,34 @@ func getEtags(etags *bolt.Bucket, name string) (string, string) {
 }
 
 func getReleases(releases *bolt.Bucket, name string) (Release, Release) {
-	latestTagKey := fmt.Sprintf("%s-latest-tag", name)
-	latestURLKey := fmt.Sprintf("%s-latest-url", name)
-
-	rcTagKey := fmt.Sprintf("%s-rc-tag", name)
-	rcURLKey := fmt.Sprintf("%s-rc-url", name)
+	latestKey := fmt.Sprintf("%s-latest", name)
+	rcKey := fmt.Sprintf("%s-rc", name)
 
 	latest := wipRelease()
 	rc := wipRelease()
 
-	if t := releases.Get([]byte(latestTagKey)); t != nil {
-		var u string
-		if ub := releases.Get([]byte(latestURLKey)); ub != nil {
-			u = string(ub)
-		}
-		latest = Release{string(t), u}
+	if t := releases.Get([]byte(latestKey)); t != nil {
+		json.Unmarshal(t, &latest)
 	}
 
-	if t := releases.Get([]byte(rcTagKey)); t != nil {
-		var u string
-		if ub := releases.Get([]byte(rcURLKey)); ub != nil {
-			u = string(ub)
-		}
-		rc = Release{string(t), u}
+	if t := releases.Get([]byte(rcKey)); t != nil {
+		json.Unmarshal(t, &rc)
 	}
 
 	return latest, rc
 }
 
-func saveRelease(tx *bolt.Tx, name, from, tag, url string) error {
+func saveRelease(tx *bolt.Tx, name, from, tag, url string, prerelease bool) error {
 	b := tx.Bucket(releasesBucket)
-	tagKey := fmt.Sprintf("%s-%s-tag", name, from)
-	urlKey := fmt.Sprintf("%s-%s-url", name, from)
+	key := fmt.Sprintf("%s-%s", name, from)
 
-	if err := b.Put([]byte(tagKey), []byte(tag)); err != nil {
+	release := Release{tag, url, prerelease}
+	bytes, err := json.Marshal(release)
+	if err != nil {
 		return err
 	}
-	if err := b.Put([]byte(urlKey), []byte(url)); err != nil {
-		return err
-	}
-	return nil
+
+	return b.Put([]byte(key), bytes)
 }
 
 func saveEtag(tx *bolt.Tx, name, from, value string) error {
