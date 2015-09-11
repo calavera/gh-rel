@@ -50,7 +50,6 @@ type add struct {
 func startServer(port uint, adminPassword string) {
 	router := gin.Default()
 	router.Static("/assets", "./assets")
-	router.LoadHTMLGlob("templates/*")
 
 	router.GET("/", func(c *gin.Context) {
 		showProjects(c)
